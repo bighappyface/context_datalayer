@@ -1,0 +1,9 @@
+name = "Context Datalayer"
+dependencies[] = "context"
+dependencies[] = "datalayer"
+description = "Provide context-based conditions and reactions for datalayer"
+package = "Context Datalayer"
+core = "7.x"
+
+files[] = tests/context_datalayer.conditions.test
+files[] = tests/context_datalayer.reactions.test
