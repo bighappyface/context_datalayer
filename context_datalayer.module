@@ -1,2 +1,55 @@
 <?php
+/**
+ * @file
+ * Context Datalayer Module.
+ */
 
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function context_datalayer_ctools_plugin_api($module, $api) {
+  if ($module == 'context' && $api == 'plugins') {
+    return array('version' => 3);
+  }
+}
+
+/**
+ * Implements hook_context_page_reaction().
+ */
+function context_datalayer_context_page_reaction() {
+  ctools_include('context_datalayer_reaction', 'context_datalayer', 'plugins');
+  if ($plugin = context_get_plugin('reaction', 'context_datalayer')) {
+    $plugin->execute();
+  }
+}
+
+/**
+ * Implements hook_context_plugins().
+ */
+function context_datalayer_context_plugins() {
+  $plugins = array();
+  $plugins['context_datalayer_reaction'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'context_datalayer') . '/plugins',
+      'file' => 'context_datalayer_reaction.inc',
+      'class' => 'context_datalayer_reaction',
+      'parent' => 'context_reaction',
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * Implements hook_context_registry().
+ */
+function context_datalayer_context_registry() {
+  return array(
+    'reactions' => array(
+      'context_datalayer' => array(
+        'title' => t('Data Layer'),
+        'description' => t('Adjust the Data Layer using context.'),
+        'plugin' => 'context_datalayer_reaction',
+      ),
+    ),
+  );
+}
