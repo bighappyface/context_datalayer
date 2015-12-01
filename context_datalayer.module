@@ -14,6 +14,17 @@ function context_datalayer_ctools_plugin_api($module, $api) {
 }
 
 /**
+ * Implements hook_theme().
+ */
+function context_datalayer_theme() {
+  return array(
+    'context_datalayer_form'=> array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
  * Implements hook_context_page_reaction().
  */
 function context_datalayer_context_page_reaction() {
@@ -52,4 +63,27 @@ function context_datalayer_context_registry() {
       ),
     ),
   );
+}
+
+/**
+ * Theme callback for context options form.
+ */
+function theme_context_datalayer_form($variables) {
+  $form = $variables['form'];
+  $rows = array();
+
+  foreach (element_children($form['context_datalayer']) as $class) {
+    $rows[] = array(
+      'data' => array(
+        render($form['context_datalayer'][$class]),
+        render($form['remove'][$class]),
+      ),
+    );
+  }
+
+  return theme('table', array(
+    'header' => array(t('Section Classes'), t('Operations')),
+    'rows' => $rows,
+    'empty' => t('No classes have been added.'),
+  )) . render($form['add']);
 }
