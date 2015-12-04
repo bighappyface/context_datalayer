@@ -14,27 +14,33 @@ class context_datalayer_reaction extends context_reaction {
   public function options_form($context) {
     $form = array();
 
-    $form['classes'] = array(
+    $form['data'] = array(
       '#type' => 'container',
       '#prefix' => '<div id="datalayer-settings-ajax-wrapper">',
       '#suffix' => '</div>',
       '#theme' => 'context_datalayer_form',
     );
 
-    $form['classes']['context_datalayer'] = array();
+    $form['data']['context_datalayer'] = array();
     if (!empty($context->reactions['context_datalayer'])) {
-      $form['classes']['remove'] = array();
-      foreach (element_children($context->reactions['context_datalayer']) as $class) {
-        $form['classes']['context_datalayer'][$class] = array(
+      $form['data']['remove'] = array();
+      foreach ($context->reactions['context_datalayer'] as $key => $value) {
+        $form['data']['context_datalayer'][$key] = array(
           '#type' => 'textfield',
-          '#title' => t('Class Name'),
+          '#title' => t('Key'),
           '#title_display' => 'invisible',
-          '#value' => $class,
+          '#value' => $key,
         );
-        $form['classes']['remove'][$class] = array(
+        $form['data']['values'][$key] = array(
+          '#type' => 'textfield',
+          '#title' => t('Value'),
+          '#title_display' => 'invisible',
+          '#value' => $value,
+        );
+        $form['data']['remove'][$key] = array(
           '#type' => 'button',
           '#value' => t('Remove'),
-          '#name' => $class,
+          '#name' => $key,
           '#ajax' => array(
             'callback' => 'context_datalayer_options_form_ajax',
             'wrapper' => 'datalayer-settings-ajax-wrapper',
@@ -44,18 +50,26 @@ class context_datalayer_reaction extends context_reaction {
       }
     }
 
-    // Add a new class.
-    $form['classes']['add'] = array(
+    // Add a new KVP.
+    $form['data']['add'] = array(
       '#type' => 'container',
     );
-    $form['classes']['add']['class'] = array(
+    $form['data']['add']['key'] = array(
       '#type' => 'textfield',
-      '#title' => t('Add a section class'),
-      '#description' => t('Provides this text as an additional body class (in <strong>$classes</strong> in html.tpl.php) when this section is active.'),
+      '#title' => t('Add Key Value'),
+      '#description' => t('Provides this key-value pair to the datalayer when this section is active.'),
+      '#size' => 16,
       '#maxlength' => 64,
       '#value' => '',
     );
-    $form['classes']['add']['button'] = array(
+    $form['data']['add']['value'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Add Value'),
+      '#title_display' => 'invisible',
+      '#maxlength' => 64,
+      '#value' => '',
+    );
+    $form['data']['add']['button'] = array(
       '#type' => 'button',
       '#value' => t('Add'),
       '#ajax' => array(
@@ -80,12 +94,12 @@ class context_datalayer_reaction extends context_reaction {
    * Options form submit handler.
    */
   public function options_form_submit($values) {
-    $classes = array();
+    $data = array();
 
-    // Build an array of classes.
-    if (!empty($values['classes']['context_datalayer'])) {
-      foreach ($values['classes']['context_datalayer'] as $class) {
-        $classes[$class] = $class;
+    // Build an array of key-value pairs.
+    if (!empty($values['data']['context_datalayer'])) {
+      foreach ($values['data']['context_datalayer'] as $key) {
+        $data[$key] = $values['data']['values'][$key];
       }
     }
 
@@ -101,28 +115,33 @@ class context_datalayer_reaction extends context_reaction {
 
       switch ($form_state['triggering_element']['#value']) {
         case t('Add'):
-          $class = $values['classes']['add']['class'];
+          $key = $values['data']['add']['key'];
+          $value = $values['data']['add']['value'];
           // @todo: Move this to the validation callback.
-          if (empty($class)) {
-            form_set_error('', t('No class name entered.'));
+          if (empty($key)) {
+            form_set_error('', t('Key is a required field.'));
             break;
           }
-          if (in_array($class, $classes)) {
-            form_set_error('', t('Class %class already exists.', array('%class' => $class)));
+          if (empty($value)) {
+            form_set_error('', t('Value is a required field.'));
+            break;
+          }
+          if (!empty($data[$key])) {
+            form_set_error('', t('Key "%key" already exists.', array('%key' => $key)));
             break;
           }
 
-          $classes[$class] = $class;
+          $data[$key] = $value;
           break;
 
         case t('Remove'):
-          unset($classes[$form_state['triggering_element']['#name']]);
+          unset($data[$form_state['triggering_element']['#name']]);
           break;
       }
     }
 
-    ksort($classes);
-    return $classes;
+    ksort($data);
+    return $data;
   }
 
   /**
@@ -131,9 +150,11 @@ class context_datalayer_reaction extends context_reaction {
   public function execute() {
     foreach ($this->get_contexts() as $context) {
       if (!empty($context->reactions[$this->plugin])) {
-        datalayer_add(array(
-          'dataLayerFoo' => array_keys($context->reactions[$this->plugin]),
-        ));
+        foreach ($context->reactions[$this->plugin] as $key => $value) {
+          datalayer_add(array(
+            $key => $value,
+          ));
+        }
       }
     }
   }
@@ -143,5 +164,5 @@ class context_datalayer_reaction extends context_reaction {
  * AJAX callback for Context reaction options form.
  */
 function context_datalayer_options_form_ajax($form, $form_state) {
-  return $form['reactions']['plugins']['context_datalayer']['classes'];
+  return $form['reactions']['plugins']['context_datalayer']['data'];
 }

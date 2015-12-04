@@ -72,18 +72,30 @@ function theme_context_datalayer_form($variables) {
   $form = $variables['form'];
   $rows = array();
 
-  foreach (element_children($form['context_datalayer']) as $class) {
+  foreach (element_children($form['context_datalayer']) as $key) {
     $rows[] = array(
       'data' => array(
-        render($form['context_datalayer'][$class]),
-        render($form['remove'][$class]),
+        render($form['context_datalayer'][$key]),
+        render($form['values'][$key]),
+        render($form['remove'][$key]),
       ),
     );
   }
 
-  return theme('table', array(
-    'header' => array(t('Section Classes'), t('Operations')),
+  $form['add']['#attributes'] = array('class' => array('container-inline'));
+  $title = $form['add']['key']['#title'];
+  $description = $form['add']['key']['#description'];
+  unset($form['add']['key']['#title']);
+  unset($form['add']['key']['#description']);
+
+  $output = theme('table', array(
+    'header' => array(array('data' => t('Key Value Pairs'), 'colspan' => 2), t('Operations')),
     'rows' => $rows,
-    'empty' => t('No classes have been added.'),
-  )) . render($form['add']);
+    'empty' => t('No data has been entered yet.'),
+  ));
+  $output .= '<h2>' . $title . '</h2>';
+  $output .= render($form['add']);
+  $output .= $description;
+
+  return $output;
 }
