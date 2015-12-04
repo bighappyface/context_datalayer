@@ -12,7 +12,15 @@ class context_datalayer_reaction extends context_reaction {
    * Implements options_form().
    */
   public function options_form($context) {
+    $defaults = $this->fetch_from_context($context, 'options');
     $form = array();
+
+    $form['overwrite'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Overwrite existing values'),
+      '#description' => t('If a datalayer key is already set on a page, checking this option will allow you to overwrite it.'),
+      '#default_value' => isset($defaults['overwrite']) ? $defaults['overwrite'] : FALSE,
+    );
 
     $form['data'] = array(
       '#type' => 'container',
@@ -22,9 +30,9 @@ class context_datalayer_reaction extends context_reaction {
     );
 
     $form['data']['context_datalayer'] = array();
-    if (!empty($context->reactions['context_datalayer'])) {
+    if (!empty($context->reactions['context_datalayer']['data'])) {
       $form['data']['remove'] = array();
-      foreach ($context->reactions['context_datalayer'] as $key => $value) {
+      foreach ($context->reactions['context_datalayer']['data'] as $key => $value) {
         $form['data']['context_datalayer'][$key] = array(
           '#type' => 'textfield',
           '#title' => t('Key'),
@@ -141,7 +149,10 @@ class context_datalayer_reaction extends context_reaction {
     }
 
     ksort($data);
-    return $data;
+    return array(
+      'overwrite' => $values['overwrite'],
+      'data' => $data,
+    );
   }
 
   /**
@@ -149,12 +160,8 @@ class context_datalayer_reaction extends context_reaction {
    */
   public function execute() {
     foreach ($this->get_contexts() as $context) {
-      if (!empty($context->reactions[$this->plugin])) {
-        foreach ($context->reactions[$this->plugin] as $key => $value) {
-          datalayer_add(array(
-            $key => $value,
-          ));
-        }
+      if (!empty($context->reactions[$this->plugin]['data'])) {
+        datalayer_add($context->reactions[$this->plugin]['data'], $context->reactions[$this->plugin]['overwrite']);
       }
     }
   }
