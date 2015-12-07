@@ -1,9 +1,9 @@
 <?php
+
 /**
  * @file
  * ContextDatalayerReactionTest
  */
-
 class ContextDatalayerReactionTest extends DrupalWebTestCase {
   protected $profile = 'testing';
 
@@ -32,26 +32,77 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
   }
 
   /**
-   * Test.
+   * Test Data.
    */
-  public function test() {
+  public function testData() {
     ctools_include('export');
     $context = ctools_export_new_object('context');
     $context->name = 'testcontext';
-    $context->conditions = array('sitewide' => array('values' => array(1=>1)));
+    $context->conditions = array('sitewide' => array('values' => array(1 => 1)));
     $context->reactions = array(
-      'context_datalayer' => array('class' => 'dataLayerBar'),
-      'theme_html' => array('class' => 'context-test-class')
+      'context_datalayer' => array(
+        'data' => array(
+          'dataLayerFoo' => 'dataLayerBar',
+          'dataLayerBaz' => 'dataLayerQux',
+        ),
+        'overwrite' => FALSE,
+      ),
     );
     $saved = context_save($context);
     $this->assertTrue($saved, "Context 'testcontext' saved.");
 
     $node = $this->drupalCreateNode();
     $output = $this->drupalGet('node/' . $node->nid);
-//    $this->assertRaw('dataLayer');
-    $this->assertRaw('context-test-class');
     $this->assertRaw('dataLayerFoo', $this->drupalGetContent());
+    $this->assertRaw('dataLayerBar', $this->drupalGetContent());
+    $this->assertRaw('dataLayerBaz', $this->drupalGetContent());
+    $this->assertRaw('dataLayerQux', $this->drupalGetContent());
 
     context_delete($context);
+  }
+
+  /**
+   * Test Overwrite.
+   */
+  public function testOverwrite() {
+    ctools_include('export');
+    $contextA = ctools_export_new_object('context');
+    $contextA->name = 'testcontextA';
+    $contextA->conditions = array('sitewide' => array('values' => array(1 => 1)));
+    $contextA->reactions = array(
+      'context_datalayer' => array(
+        'data' => array(
+          'dataLayerFoo' => 'dataLayerBar',
+          'dataLayerBaz' => 'dataLayerQux',
+        ),
+        'overwrite' => FALSE,
+      ),
+    );
+    $saved = context_save($contextA);
+    $this->assertTrue($saved, "Context 'testcontextA' saved.");
+
+    $contextB = ctools_export_new_object('context');
+    $contextB->name = 'testcontextB';
+    $contextB->conditions = array('sitewide' => array('values' => array(1 => 1)));
+    $contextB->reactions = array(
+      'context_datalayer' => array(
+        'data' => array(
+          'dataLayerFoo' => 'dataLayerBarB',
+        ),
+        'overwrite' => TRUE,
+      ),
+    );
+    $saved = context_save($contextB);
+    $this->assertTrue($saved, "Context 'testcontextB' saved.");
+
+    $node = $this->drupalCreateNode();
+    $output = $this->drupalGet('node/' . $node->nid);
+    $this->assertRaw('dataLayerFoo', $this->drupalGetContent());
+    $this->assertRaw('dataLayerBarB', $this->drupalGetContent());
+    $this->assertRaw('dataLayerBaz', $this->drupalGetContent());
+    $this->assertRaw('dataLayerQux', $this->drupalGetContent());
+
+    context_delete($contextA);
+    context_delete($contextB);
   }
 }
