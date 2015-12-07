@@ -4,6 +4,7 @@
  * @file
  * ContextDatalayerReactionTest
  */
+
 class ContextDatalayerReactionTest extends DrupalWebTestCase {
   protected $profile = 'testing';
 
@@ -66,10 +67,10 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
    */
   public function testOverwrite() {
     ctools_include('export');
-    $contextA = ctools_export_new_object('context');
-    $contextA->name = 'testcontextA';
-    $contextA->conditions = array('sitewide' => array('values' => array(1 => 1)));
-    $contextA->reactions = array(
+    $context_a = ctools_export_new_object('context');
+    $context_a->name = 'testcontextA';
+    $context_a->conditions = array('sitewide' => array('values' => array(1 => 1)));
+    $context_a->reactions = array(
       'context_datalayer' => array(
         'data' => array(
           'dataLayerFoo' => 'dataLayerBar',
@@ -78,13 +79,13 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
         'overwrite' => FALSE,
       ),
     );
-    $saved = context_save($contextA);
+    $saved = context_save($context_a);
     $this->assertTrue($saved, "Context 'testcontextA' saved.");
 
-    $contextB = ctools_export_new_object('context');
-    $contextB->name = 'testcontextB';
-    $contextB->conditions = array('sitewide' => array('values' => array(1 => 1)));
-    $contextB->reactions = array(
+    $context_b = ctools_export_new_object('context');
+    $context_b->name = 'testcontextB';
+    $context_b->conditions = array('sitewide' => array('values' => array(1 => 1)));
+    $context_b->reactions = array(
       'context_datalayer' => array(
         'data' => array(
           'dataLayerFoo' => 'dataLayerBarB',
@@ -92,7 +93,7 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
         'overwrite' => TRUE,
       ),
     );
-    $saved = context_save($contextB);
+    $saved = context_save($context_b);
     $this->assertTrue($saved, "Context 'testcontextB' saved.");
 
     $node = $this->drupalCreateNode();
@@ -102,7 +103,7 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
     $this->assertRaw('dataLayerBaz', $this->drupalGetContent());
     $this->assertRaw('dataLayerQux', $this->drupalGetContent());
 
-    context_delete($contextA);
-    context_delete($contextB);
+    context_delete($context_a);
+    context_delete($context_b);
   }
 }

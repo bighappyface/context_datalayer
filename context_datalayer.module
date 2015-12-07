@@ -18,7 +18,7 @@ function context_datalayer_ctools_plugin_api($module, $api) {
  */
 function context_datalayer_theme() {
   return array(
-    'context_datalayer_form'=> array(
+    'context_datalayer_form' => array(
       'render element' => 'form',
     ),
   );
@@ -89,7 +89,9 @@ function theme_context_datalayer_form($variables) {
   unset($form['add']['key']['#description']);
 
   $output = theme('table', array(
-    'header' => array(array('data' => t('Key Value Pairs'), 'colspan' => 2), t('Operations')),
+    'header' => array(
+      array('data' => t('Key Value Pairs'), 'colspan' => 2), t('Operations'),
+    ),
     'rows' => $rows,
     'empty' => t('No data has been entered yet.'),
   ));
