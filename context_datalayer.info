@@ -5,5 +5,4 @@ description = "Provide context-based conditions and reactions for datalayer"
 package = "Context Datalayer"
 core = "7.x"
 
-files[] = tests/context_datalayer_reaction.unit.test
 files[] = tests/context_datalayer_reaction.web.test

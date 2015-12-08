@@ -1,10 +1,12 @@
 <?php
-
 /**
  * @file
- * ContextDatalayerReactionTest
+ * Context Datalayer Reaction Web Tests.
  */
 
+/**
+ * Class ContextDatalayerReactionTest
+ */
 class ContextDatalayerReactionTest extends DrupalWebTestCase {
   protected $profile = 'testing';
 
@@ -106,4 +108,5 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
     context_delete($context_a);
     context_delete($context_b);
   }
+
 }
