@@ -160,8 +160,9 @@ class context_datalayer_reaction extends context_reaction {
    */
   public function execute() {
     foreach ($this->get_contexts() as $context) {
-      if (!empty($context->reactions[$this->plugin]['data'])) {
-        datalayer_add($context->reactions[$this->plugin]['data'], $context->reactions[$this->plugin]['overwrite']);
+      $options = $this->fetch_from_context($context);
+      if (!empty($options['data'])) {
+        datalayer_add($options['data'], $options['overwrite']);
       }
     }
   }
