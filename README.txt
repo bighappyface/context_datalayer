@@ -28,7 +28,7 @@ REQUIREMENTS
 This module requires the following modules:
 
  * Context (https://drupal.org/project/context)
- * Datalayer (https://drupal.org/project/datalyer)
+ * Datalayer (https://drupal.org/project/datalayer)
 
 
 INSTALLATION
