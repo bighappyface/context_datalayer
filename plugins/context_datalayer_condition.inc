@@ -1,38 +1,28 @@
 <?php
 /**
  * @file
- * Context Datalayer reaction plugin for Context API.
+ * Context Datalayer condition plugin for Context API.
  */
 
 /**
- * Context Reaction plugin to set datalayer values.
+ * Context Condition plugin to detect datalayer values.
  */
-class context_datalayer_reaction extends context_reaction {
+class context_datalayer_condition extends context_condition {
   /**
-   * Implements options_form().
+   * Implements condition_form().
    */
-  public function options_form($context) {
-    $defaults = $this->fetch_from_context($context, 'options');
-    $form = parent::options_form($context);
-
-    $form['overwrite'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Overwrite existing values'),
-      '#description' => t('If a datalayer key is already set on a page, checking this option will allow you to overwrite it.'),
-      '#default_value' => isset($defaults['overwrite']) ? $defaults['overwrite'] : FALSE,
-    );
-
+  public function condition_form($context) {
     $form['data'] = array(
       '#type' => 'container',
-      '#prefix' => '<div id="datalayer-reaction-ajax-wrapper">',
+      '#prefix' => '<div id="datalayer-condition-ajax-wrapper">',
       '#suffix' => '</div>',
       '#theme' => 'context_datalayer_form',
     );
 
     $form['data']['context_datalayer'] = array();
-    if (!empty($context->reactions[$this->plugin]['data'])) {
+    if (!empty($context->conditions[$this->plugin]['values'])) {
       $form['data']['remove'] = array();
-      foreach ($context->reactions[$this->plugin]['data'] as $key => $value) {
+      foreach ($context->conditions[$this->plugin]['values'] as $key => $value) {
         $form['data']['context_datalayer'][$key] = array(
           '#type' => 'textfield',
           '#title' => t('Key'),
@@ -50,8 +40,8 @@ class context_datalayer_reaction extends context_reaction {
           '#value' => t('Remove'),
           '#name' => $key,
           '#ajax' => array(
-            'callback' => 'context_datalayer_reaction_options_form_ajax',
-            'wrapper' => 'datalayer-reaction-ajax-wrapper',
+            'callback' => 'context_datalayer_condition_options_form_ajax',
+            'wrapper' => 'datalayer-condition-ajax-wrapper',
           ),
           '#limit_validation_errors' => TRUE,
         );
@@ -79,10 +69,10 @@ class context_datalayer_reaction extends context_reaction {
     );
     $form['data']['add']['button'] = array(
       '#type' => 'button',
-      '#value' => t('Add Reaction'),
+      '#value' => t('Add Condition'),
       '#ajax' => array(
-        'callback' => 'context_datalayer_reaction_options_form_ajax',
-        'wrapper' => 'datalayer-reaction-ajax-wrapper',
+        'callback' => 'context_datalayer_condition_options_form_ajax',
+        'wrapper' => 'datalayer-condition-ajax-wrapper',
       ),
       '#limit_validation_errors' => TRUE,
     );
@@ -91,17 +81,17 @@ class context_datalayer_reaction extends context_reaction {
   }
 
   /**
-   * Options form validation handler.
+   * Conditions form validation handler.
    */
-  public function options_form_validate($form, &$form_state) {
-    // Context module doesn't allow for validation of reaction fields.
+  public function condition_form_validate($form, &$form_state) {
+    // Context module doesn't allow for validation of conditions fields.
     // @todo: Raise bug for context module.
   }
 
   /**
-   * Options form submit handler.
+   * Conditions form submit handler.
    */
-  public function options_form_submit($values) {
+  public function condition_form_submit($values) {
     $data = array();
 
     // Build an array of key-value pairs.
@@ -122,7 +112,7 @@ class context_datalayer_reaction extends context_reaction {
       $form = form_builder($form['#form_id'], $form, $form_state);
 
       switch ($form_state['triggering_element']['#value']) {
-        case t('Add Reaction'):
+        case t('Add Condition'):
           $key = $values['data']['add']['key'];
           $value = $values['data']['add']['value'];
           // @todo: Move this to the validation callback.
@@ -149,20 +139,21 @@ class context_datalayer_reaction extends context_reaction {
     }
 
     ksort($data);
-    return array(
-      'overwrite' => $values['overwrite'],
-      'data' => $data,
-    );
+    return $data;
   }
 
   /**
    * Execute.
    */
   public function execute() {
-    foreach ($this->get_contexts() as $context) {
-      $options = $this->fetch_from_context($context);
-      if (!empty($options['data'])) {
-        datalayer_add($options['data'], $options['overwrite']);
+    if ($this->condition_used()) {
+      $datalayer = datalayer_add();
+      foreach ($this->get_contexts() as $context) {
+        foreach ($this->fetch_from_context($context, 'values') as $key => $value) {
+          if (isset($datalayer[$key]) && $datalayer[$key] = $value) {
+            $this->condition_met($context);
+          }
+        }
       }
     }
   }
@@ -171,6 +162,6 @@ class context_datalayer_reaction extends context_reaction {
 /**
  * AJAX callback for Context reaction options form.
  */
-function context_datalayer_reaction_options_form_ajax($form, $form_state) {
-  return $form['reactions']['plugins']['context_datalayer_reaction']['data'];
+function context_datalayer_condition_options_form_ajax($form, $form_state) {
+  return $form['conditions']['plugins']['context_datalayer_condition']['values']['data'];
 }
