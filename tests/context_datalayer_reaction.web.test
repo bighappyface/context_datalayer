@@ -5,7 +5,7 @@
  */
 
 /**
- * Class ContextDatalayerReactionTest
+ * Class ContextDatalayerReactionTest.
  */
 class ContextDatalayerReactionTest extends DrupalWebTestCase {
   protected $profile = 'testing';
@@ -56,10 +56,10 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
 
     $node = $this->drupalCreateNode();
     $output = $this->drupalGet('node/' . $node->nid);
-    $this->assertRaw('dataLayerFoo', $this->drupalGetContent());
-    $this->assertRaw('dataLayerBar', $this->drupalGetContent());
-    $this->assertRaw('dataLayerBaz', $this->drupalGetContent());
-    $this->assertRaw('dataLayerQux', $this->drupalGetContent());
+    $this->assertRaw('dataLayerFoo', $output);
+    $this->assertRaw('dataLayerBar', $output);
+    $this->assertRaw('dataLayerBaz', $output);
+    $this->assertRaw('dataLayerQux', $output);
 
     context_delete($context);
   }
@@ -100,10 +100,10 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
 
     $node = $this->drupalCreateNode();
     $output = $this->drupalGet('node/' . $node->nid);
-    $this->assertRaw('dataLayerFoo', $this->drupalGetContent());
-    $this->assertRaw('dataLayerBarB', $this->drupalGetContent());
-    $this->assertRaw('dataLayerBaz', $this->drupalGetContent());
-    $this->assertRaw('dataLayerQux', $this->drupalGetContent());
+    $this->assertRaw('dataLayerFoo', $output);
+    $this->assertRaw('dataLayerBarB', $output);
+    $this->assertRaw('dataLayerBaz', $output);
+    $this->assertRaw('dataLayerQux', $output);
 
     context_delete($context_a);
     context_delete($context_b);
