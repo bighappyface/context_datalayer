@@ -25,11 +25,19 @@ function context_datalayer_theme() {
 }
 
 /**
+ * Implements hook_context_page_condition().
+ */
+function context_datalayer_context_page_condition() {
+  if ($plugin = context_get_plugin('condition', 'context_datalayer_condition')) {
+    $plugin->execute();
+  }
+}
+
+/**
  * Implements hook_context_page_reaction().
  */
 function context_datalayer_context_page_reaction() {
-  ctools_include('context_datalayer_reaction', 'context_datalayer', 'plugins');
-  if ($plugin = context_get_plugin('reaction', 'context_datalayer')) {
+  if ($plugin = context_get_plugin('reaction', 'context_datalayer_reaction')) {
     $plugin->execute();
   }
 }
@@ -38,16 +46,24 @@ function context_datalayer_context_page_reaction() {
  * Implements hook_context_plugins().
  */
 function context_datalayer_context_plugins() {
-  $plugins = array();
-  $plugins['context_datalayer_reaction'] = array(
-    'handler' => array(
-      'path' => drupal_get_path('module', 'context_datalayer') . '/plugins',
-      'file' => 'context_datalayer_reaction.inc',
-      'class' => 'context_datalayer_reaction',
-      'parent' => 'context_reaction',
+  return array(
+    'context_datalayer_condition' => array(
+      'handler' => array(
+        'path' => drupal_get_path('module', 'context_datalayer') . '/plugins',
+        'file' => 'context_datalayer_condition.inc',
+        'class' => 'context_datalayer_condition',
+        'parent' => 'context_condition',
+      ),
+    ),
+    'context_datalayer_reaction' => array(
+      'handler' => array(
+        'path' => drupal_get_path('module', 'context_datalayer') . '/plugins',
+        'file' => 'context_datalayer_reaction.inc',
+        'class' => 'context_datalayer_reaction',
+        'parent' => 'context_reaction',
+      ),
     ),
   );
-  return $plugins;
 }
 
 /**
@@ -55,8 +71,15 @@ function context_datalayer_context_plugins() {
  */
 function context_datalayer_context_registry() {
   return array(
+    'conditions' => array(
+      'context_datalayer_condition' => array(
+        'title' => t('Data Layer'),
+        'description' => t('React to the Data Layer using context.'),
+        'plugin' => 'context_datalayer_condition',
+      ),
+    ),
     'reactions' => array(
-      'context_datalayer' => array(
+      'context_datalayer_reaction' => array(
         'title' => t('Data Layer'),
         'description' => t('Adjust the Data Layer using context.'),
         'plugin' => 'context_datalayer_reaction',
@@ -90,7 +113,11 @@ function theme_context_datalayer_form($variables) {
 
   $output = theme('table', array(
     'header' => array(
-      array('data' => t('Key Value Pairs'), 'colspan' => 2), t('Operations'),
+      array(
+        'data' => t('Key Value Pairs'),
+        'colspan' => 2,
+      ),
+      t('Operations'),
     ),
     'rows' => $rows,
     'empty' => t('No data has been entered yet.'),
@@ -98,6 +125,7 @@ function theme_context_datalayer_form($variables) {
   $output .= '<h2>' . $title . '</h2>';
   $output .= render($form['add']);
   $output .= $description;
+  $output .= drupal_render_children($form);
 
   return $output;
 }
