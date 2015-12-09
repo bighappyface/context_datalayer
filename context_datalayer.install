@@ -1,0 +1,27 @@
+<?php
+/**
+ * @file
+ * Context Datalayer installation file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function context_datalayer_install() {
+  // Make the module heavy so it runs after other modules utilise
+  // hook_datalayer_alter().
+  db_update('system')
+    ->fields(array('weight' => 1000))
+    ->condition('name', 'context_datalayer')
+    ->execute();
+}
+
+/**
+ * Make the module heavier to benefit hook_datalayer_alter().
+ */
+function context_datalayer_update_7000() {
+  db_update('system')
+    ->fields(array('weight' => 1000))
+    ->condition('name', 'context_datalayer')
+    ->execute();
+}

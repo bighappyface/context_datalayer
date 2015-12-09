@@ -25,20 +25,14 @@ function context_datalayer_theme() {
 }
 
 /**
- * Implements hook_context_page_condition().
+ * Implements hook_datalayer_alter().
  */
-function context_datalayer_context_page_condition() {
+function context_datalayer_datalayer_alter(&$datalayer) {
   if ($plugin = context_get_plugin('condition', 'context_datalayer_condition')) {
-    $plugin->execute();
+    $plugin->execute($datalayer);
   }
-}
-
-/**
- * Implements hook_context_page_reaction().
- */
-function context_datalayer_context_page_reaction() {
   if ($plugin = context_get_plugin('reaction', 'context_datalayer_reaction')) {
-    $plugin->execute();
+    $plugin->execute($datalayer);
   }
 }
 

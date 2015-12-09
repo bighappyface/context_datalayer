@@ -145,9 +145,8 @@ class context_datalayer_condition extends context_condition {
   /**
    * Execute.
    */
-  public function execute() {
+  public function execute($datalayer) {
     if ($this->condition_used()) {
-      $datalayer = datalayer_add();
       foreach ($this->get_contexts() as $context) {
         foreach ($this->fetch_from_context($context, 'values') as $key => $value) {
           if (isset($datalayer[$key]) && $datalayer[$key] = $value) {
