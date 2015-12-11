@@ -65,7 +65,7 @@ class context_datalayer_reaction extends context_reaction {
     $form['data']['add']['key'] = array(
       '#type' => 'textfield',
       '#title' => t('Add Key/ Value'),
-      '#description' => t('Provides this key-value pair to the datalayer when this section is active.'),
+      '#description' => t('Provides this key-value pair to the datalayer when this section is active. Note the value field can accept tokens.'),
       '#size' => 16,
       '#maxlength' => 64,
       '#value' => '',
@@ -162,11 +162,14 @@ class context_datalayer_reaction extends context_reaction {
     foreach ($this->get_contexts() as $context) {
       $options = $this->fetch_from_context($context);
       if (!empty($options['data'])) {
+        $data = array_map(function($value) {
+          return token_replace($value, array('node' => menu_get_object()));
+        }, $options['data']);
         if ($options['overwrite']) {
-          $datalayer = array_merge($datalayer, $options['data']);
+          $datalayer = array_merge($datalayer, $data);
         }
         else {
-          $datalayer += $options['data'];
+          $datalayer += $data;
         }
       }
     }
