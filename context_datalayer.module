@@ -93,6 +93,7 @@ function theme_context_datalayer_form($variables) {
     $rows[] = array(
       'data' => array(
         render($form['context_datalayer'][$key]),
+        render($form['types'][$key]),
         render($form['values'][$key]),
         render($form['remove'][$key]),
       ),
@@ -109,7 +110,7 @@ function theme_context_datalayer_form($variables) {
     'header' => array(
       array(
         'data' => t('Key Value Pairs'),
-        'colspan' => 2,
+        'colspan' => 3,
       ),
       t('Operations'),
     ),

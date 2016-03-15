@@ -37,7 +37,20 @@ class context_datalayer_reaction extends context_reaction {
           '#type' => 'textfield',
           '#title' => t('Key'),
           '#title_display' => 'invisible',
+          '#size' => 16,
+          '#maxlength' => 64,
           '#value' => $key,
+        );
+        $form['data']['types'][$key] = array(
+          '#type' => 'select',
+          '#title' => t('Type'),
+          '#title_display' => 'invisible',
+          '#options' => array(
+            'string' => t('String'),
+            'integer' => t('Integer'),
+            'boolean' => t('Boolean'),
+          ),
+          '#value' => gettype($value),
         );
         $form['data']['values'][$key] = array(
           '#type' => 'textfield',
@@ -65,10 +78,20 @@ class context_datalayer_reaction extends context_reaction {
     $form['data']['add']['key'] = array(
       '#type' => 'textfield',
       '#title' => t('Add Key/ Value'),
-      '#description' => t('Provides this key-value pair to the datalayer when this section is active. Note the value field can accept tokens.'),
+      '#description' => t('Provides this key-value pair to the datalayer when this section is active. Note the value field can accept tokens. Please use 0/1 for representing booleans.'),
       '#size' => 16,
       '#maxlength' => 64,
       '#value' => '',
+    );
+    $form['data']['add']['type'] = array(
+      '#type' => 'select',
+      '#title' => t('Type'),
+      '#options' => array(
+        'string' => t('String'),
+        'integer' => t('Integer'),
+        'boolean' => t('Boolean'),
+      ),
+      '#value' => 'string',
     );
     $form['data']['add']['value'] = array(
       '#type' => 'textfield',
@@ -107,6 +130,7 @@ class context_datalayer_reaction extends context_reaction {
     // Build an array of key-value pairs.
     if (!empty($values['data']['context_datalayer'])) {
       foreach ($values['data']['context_datalayer'] as $key) {
+        settype($values['data']['values'][$key], $values['data']['types'][$key]);
         $data[$key] = $values['data']['values'][$key];
       }
     }
@@ -124,13 +148,14 @@ class context_datalayer_reaction extends context_reaction {
       switch ($form_state['triggering_element']['#value']) {
         case t('Add Reaction'):
           $key = $values['data']['add']['key'];
+          $type = $values['data']['add']['type'];
           $value = $values['data']['add']['value'];
           // @todo: Move this to the validation callback.
           if (empty($key)) {
             form_set_error('', t('Key is a required field.'));
             break;
           }
-          if (empty($value)) {
+          if (empty($value) && $value !== '0') {
             form_set_error('', t('Value is a required field.'));
             break;
           }
@@ -138,7 +163,16 @@ class context_datalayer_reaction extends context_reaction {
             form_set_error('', t('Key "%key" already exists.', array('%key' => $key)));
             break;
           }
+          if ($type == 'boolean' && !in_array($value, array('0', '1'))) {
+            form_set_error('', t('Value "%value" should be either 0 or 1 when set to the boolean type.', array('%value' => $value)));
+            break;
+          }
+          if ($type == 'number' && !is_numeric($value)) {
+            form_set_error('', t('Value "%value" is not numeric.', array('%value' => $value)));
+            break;
+          }
 
+          settype($value, $type);
           $data[$key] = $value;
           break;
 
