@@ -41,9 +41,9 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
     ctools_include('export');
     $context = ctools_export_new_object('context');
     $context->name = 'testcontext';
-    $context->conditions = array('sitewide' => array('values' => array(1 => 1)));
+    $context->conditions = array('sitewide' => array('values' => array(1)));
     $context->reactions = array(
-      'context_datalayer' => array(
+      'context_datalayer_reaction' => array(
         'data' => array(
           'dataLayerFoo' => 'dataLayerBar',
           'dataLayerBaz' => 'dataLayerQux',
@@ -71,9 +71,9 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
     ctools_include('export');
     $context_a = ctools_export_new_object('context');
     $context_a->name = 'testcontextA';
-    $context_a->conditions = array('sitewide' => array('values' => array(1 => 1)));
+    $context_a->conditions = array('sitewide' => array('values' => array(1)));
     $context_a->reactions = array(
-      'context_datalayer' => array(
+      'context_datalayer_reaction' => array(
         'data' => array(
           'dataLayerFoo' => 'dataLayerBar',
           'dataLayerBaz' => 'dataLayerQux',
@@ -86,9 +86,9 @@ class ContextDatalayerReactionTest extends DrupalWebTestCase {
 
     $context_b = ctools_export_new_object('context');
     $context_b->name = 'testcontextB';
-    $context_b->conditions = array('sitewide' => array('values' => array(1 => 1)));
+    $context_b->conditions = array('sitewide' => array('values' => array(1)));
     $context_b->reactions = array(
-      'context_datalayer' => array(
+      'context_datalayer_reaction' => array(
         'data' => array(
           'dataLayerFoo' => 'dataLayerBarB',
         ),
