@@ -82,19 +82,6 @@ class DataLayerContextReactionFunctionalTest extends BrowserTestBase {
     $assert->pageTextNotContains('No key/value pairs found');
     $assert->pageTextContains('"foo":"bar"');
     $assert->pageTextContains('"bar":"baz"');
-    // Verify datalayer overwrite.
-    $assert->pageTextContains('"drupalLanguage":"en"');
-    $this->drupalPostForm(
-      'admin/structure/context/datalayer_test_context',
-      [
-        'reactions[datalayer][datalayer_overwrite]' => '1',
-      ],
-      t('Save and continue')
-    );
-    $this->drupalGet('admin/structure/context/datalayer_test_context');
-    $assert->pageTextContains('"foo":"bar"');
-    $assert->pageTextContains('"bar":"baz"');
-    $assert->pageTextNotContains('"drupalLanguage":"en"');
     // Verify we can remove a pair.
     $this->drupalPostForm(
       'admin/structure/context/datalayer_test_context',
@@ -191,6 +178,22 @@ class DataLayerContextReactionFunctionalTest extends BrowserTestBase {
     $assert->pageTextContains('"foo":"bar"');
     $assert->pageTextContains('"bar":2018');
     $assert->pageTextContains('"baz":true');
+    // Verify datalayer overwrite.
+    $assert->pageTextContains('"drupalLanguage":"en"');
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'drupalLanguage',
+        'reactions[datalayer][new][value]' => 'foobarbaz',
+        'reactions[datalayer][new][type]' => 'string',
+        'reactions[datalayer][add_new_pair]' => '1',
+        'reactions[datalayer][datalayer_overwrite]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextNotContains('"drupalLanguage":"en"');
+    $assert->pageTextContains('"drupalLanguage":"foobarbaz"');
   }
 
 }
