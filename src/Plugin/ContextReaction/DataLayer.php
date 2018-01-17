@@ -43,9 +43,11 @@ class DataLayer extends ContextReactionPluginBase {
         case 'integer':
           $value = (int) $item['value'];
           break;
+
         case 'boolean':
           $value = (bool) $item['value'];
           break;
+
         default:
           $value = $item['value'];
       }
