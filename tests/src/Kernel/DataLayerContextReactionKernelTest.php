@@ -40,6 +40,26 @@ class DataLayerContextReactionKernelTest extends EntityKernelTestBase {
           'value' => 'barbaz',
           'type' => 'bazqux',
         ],
+        [
+          'key' => 'foostring',
+          'value' => 'barbaz',
+          'type' => 'string',
+        ],
+        [
+          'key' => 'foointeger',
+          'value' => '2042',
+          'type' => 'integer',
+        ],
+        [
+          'key' => 'foobooleantrue',
+          'value' => '1',
+          'type' => 'boolean',
+        ],
+        [
+          'key' => 'foobooleanfalse',
+          'value' => '0',
+          'type' => 'boolean',
+        ],
       ],
     ];
     // Define expected data to be sent to datalayer_add().
@@ -47,13 +67,17 @@ class DataLayerContextReactionKernelTest extends EntityKernelTestBase {
       'data' => [
         'foo' => 'bar',
         'foobar' => 'barbaz',
+        'foostring' => 'barbaz',
+        'foointeger' => 2042,
+        'foobooleantrue' => TRUE,
+        'foobooleanfalse' => FALSE,
       ],
       'overwrite' => 0,
     ];
     // Create a mock of our plugin so that we can use mock facilities.
     $plugin = new DataLayer($configuration, 'datalayer', '');
     // Invoke execute().
-    $this->assertEquals($expected, $plugin->execute());
+    $this->assertSame($expected, $plugin->execute());
   }
 
 }

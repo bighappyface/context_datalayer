@@ -39,7 +39,17 @@ class DataLayer extends ContextReactionPluginBase {
     $config = $this->getConfiguration();
     $data = [];
     foreach ($config['data'] as $item) {
-      $data[$item['key']] = $item['value'];
+      switch ($item['type']) {
+        case 'integer':
+          $value = (int) $item['value'];
+          break;
+        case 'boolean':
+          $value = (bool) $item['value'];
+          break;
+        default:
+          $value = $item['value'];
+      }
+      $data[$item['key']] = $value;
     }
     return [
       'data' => $data,
