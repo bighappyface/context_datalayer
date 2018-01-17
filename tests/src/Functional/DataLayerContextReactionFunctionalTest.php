@@ -156,6 +156,41 @@ class DataLayerContextReactionFunctionalTest extends BrowserTestBase {
     $assert->pageTextContains('No key/value pairs found');
     $assert->pageTextNotContains('"baz":"qux"');
     $assert->pageTextNotContains('"quux":"qub"');
+    // Verify type output.
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'foo',
+        'reactions[datalayer][new][value]' => 'bar',
+        'reactions[datalayer][new][type]' => 'string',
+        'reactions[datalayer][add_new_pair]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'bar',
+        'reactions[datalayer][new][value]' => '2018',
+        'reactions[datalayer][new][type]' => 'integer',
+        'reactions[datalayer][add_new_pair]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'baz',
+        'reactions[datalayer][new][value]' => '1',
+        'reactions[datalayer][new][type]' => 'boolean',
+        'reactions[datalayer][add_new_pair]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextContains('"foo":"bar"');
+    $assert->pageTextContains('"bar":2018');
+    $assert->pageTextContains('"baz":true');
   }
 
 }
