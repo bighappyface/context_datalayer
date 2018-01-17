@@ -24,9 +24,9 @@ class DataLayerContextReactionFunctionalTest extends BrowserTestBase {
   ];
 
   /**
-   * Tests dataLayer output.
+   * Tests DataLayer ContextReaction Configuration Form Handling.
    */
-  public function testDataLayerOutput() {
+  public function testDataLayerContextReactionConfigurationFormHandling() {
     // Setup assert session.
     $assert = $this->assertSession();
     // Login.
@@ -38,42 +38,124 @@ class DataLayerContextReactionFunctionalTest extends BrowserTestBase {
     $this->drupalPostForm('admin/structure/context/datalayer_test_context', ['conditions[user_role][roles][authenticated]' => 'authenticated'], t('Save and continue'));
     // Add datalayer reaction.
     $this->drupalGet('admin/structure/context/datalayer_test_context/reaction/add/datalayer');
-    $this->drupalPostForm(
-      'admin/structure/context/datalayer_test_context',
-      [
-        'reactions[datalayer][datalayer_key]' => 'foo',
-        'reactions[datalayer][datalayer_value]' => 'bar',
-        'reactions[datalayer][datalayer_type]' => 'int',
-      ],
-      t('Save and continue')
-    );
-    // Verify field values.
     $this->drupalGet('admin/structure/context/datalayer_test_context');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_key]', 'foo');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_value]', 'bar');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_type]', 'int');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_overwrite]', '');
-    // Verify dataLayer addition.
-    $assert->pageTextContains('var dataLayer = [{"drupalLanguage":"en","drupalCountry":"","siteName":"Drupal","userUid":"1","foo":"bar"}];');
-    // // Set enable overwrite.
+    // Verify add new pair checkbox is required key/value pair.
     $this->drupalPostForm(
       'admin/structure/context/datalayer_test_context',
       [
-        'reactions[datalayer][datalayer_key]' => 'foo',
-        'reactions[datalayer][datalayer_value]' => 'bar',
-        'reactions[datalayer][datalayer_type]' => 'int',
+        'reactions[datalayer][new][key]' => 'foo',
+        'reactions[datalayer][new][value]' => 'bar',
+        'reactions[datalayer][new][type]' => 'string',
+        'reactions[datalayer][add_new_pair]' => '',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextContains('No key/value pairs found');
+    $assert->pageTextNotContains('"foo":"bar"');
+    // Verify we can add a new pair.
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'foo',
+        'reactions[datalayer][new][value]' => 'bar',
+        'reactions[datalayer][new][type]' => 'string',
+        'reactions[datalayer][add_new_pair]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextNotContains('No key/value pairs found');
+    $assert->pageTextContains('"foo":"bar"');
+    // Verify we can add a second pair.
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'bar',
+        'reactions[datalayer][new][value]' => 'baz',
+        'reactions[datalayer][new][type]' => 'string',
+        'reactions[datalayer][add_new_pair]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextNotContains('No key/value pairs found');
+    $assert->pageTextContains('"foo":"bar"');
+    $assert->pageTextContains('"bar":"baz"');
+    // Verify datalayer overwrite.
+    $assert->pageTextContains('"drupalLanguage":"en"');
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
         'reactions[datalayer][datalayer_overwrite]' => '1',
       ],
       t('Save and continue')
     );
-    // Verify field values.
     $this->drupalGet('admin/structure/context/datalayer_test_context');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_key]', 'foo');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_value]', 'bar');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_type]', 'int');
-    $assert->fieldValueEquals('reactions[datalayer][datalayer_overwrite]', '1');
-    // Verify dataLayer overwrite.
-    $assert->pageTextContains('var dataLayer = [{"foo":"bar"}];');
+    $assert->pageTextContains('"foo":"bar"');
+    $assert->pageTextContains('"bar":"baz"');
+    $assert->pageTextNotContains('"drupalLanguage":"en"');
+    // Verify we can remove a pair.
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][remove][remove_table][2]' => '2',
+      ],
+      t('Remove selected pairs')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextContains('"foo":"bar"');
+    $assert->pageTextNotContains('"bar":"baz"');
+    // Verify we can remove all pairs.
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][remove][remove_table][1]' => '1',
+      ],
+      t('Remove selected pairs')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextContains('No key/value pairs found');
+    $assert->pageTextNotContains('"foo":"bar"');
+    $assert->pageTextNotContains('"bar":"baz"');
+    // Verify we can remove multiple pairs.
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'baz',
+        'reactions[datalayer][new][value]' => 'qux',
+        'reactions[datalayer][new][type]' => 'string',
+        'reactions[datalayer][add_new_pair]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][new][key]' => 'quux',
+        'reactions[datalayer][new][value]' => 'qub',
+        'reactions[datalayer][new][type]' => 'string',
+        'reactions[datalayer][add_new_pair]' => '1',
+      ],
+      t('Add new pair')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextNotContains('No key/value pairs found');
+    $assert->pageTextContains('"baz":"qux"');
+    $assert->pageTextContains('"quux":"qub"');
+    $this->drupalPostForm(
+      'admin/structure/context/datalayer_test_context',
+      [
+        'reactions[datalayer][remove][remove_table][1]' => '1',
+        'reactions[datalayer][remove][remove_table][2]' => '2',
+      ],
+      t('Remove selected pairs')
+    );
+    $this->drupalGet('admin/structure/context/datalayer_test_context');
+    $assert->pageTextContains('No key/value pairs found');
+    $assert->pageTextNotContains('"baz":"qux"');
+    $assert->pageTextNotContains('"quux":"qub"');
   }
 
 }

@@ -51,44 +51,92 @@ class DataLayer extends ContextReactionPluginBase {
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $form['datalayer_key'] = [
+
+    $remove_options = [];
+
+    if (!empty($this->getConfiguration()['data'])) {
+      $remove_options = $this->getConfiguration()['data'];
+    }
+    array_unshift($remove_options, '');
+    unset($remove_options[0]);
+
+    $header = [
+      'key' => $this->t('Key'),
+      'value' => $this->t('Value'),
+      'type' => $this->t('Type'),
+    ];
+
+    $form['remove'] = [
+      '#type' => 'container',
+      '#suffix' => '<br>',
+    ];
+
+    $form['remove']['remove_table'] = [
+      '#type' => 'tableselect',
+      '#header' => $header,
+      '#options' => $remove_options,
+      '#empty' => $this->t('No key/value pairs found'),
+    ];
+
+    $form['remove']['remove_selected'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Remove selected pairs'),
+      '#attributes' => ['class' => ['button--small']],
+      '#submit' => ['::submitForm', '::save'],
+    ];
+
+    $form['datalayer_overwrite'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Overwrite existing values'),
+      '#description' => t('If a datalayer key is already set on a page, checking this option will allow you to overwrite it.'),
+      '#default_value' => $this->getConfiguration()['overwrite'],
+    ];
+
+    $form['add_new_pair'] = [
+      '#type' => 'checkbox',
+      '#title' => t('Add a key/value pair'),
+    ];
+
+    $form['new'] = [
+      '#id' => 'add_new_pair_fieldset',
+      '#type' => 'fieldset',
+      '#title' => $this->t('Add a key/value pair'),
+      '#states' => [
+        'visible' => [
+          ':input[name="reactions[datalayer][add_new_pair]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+
+    $form['new']['key'] = [
+      '#type' => 'textfield',
       '#title' => $this->t('Key'),
-      '#type' => 'textfield',
-      '#description' => $this->t('The key for the key/value pair'),
+      '#maxlength' => 255,
     ];
 
-    $form['datalayer_value'] = [
+    $form['new']['value'] = [
+      '#type' => 'textfield',
       '#title' => $this->t('Value'),
-      '#type' => 'textfield',
-      '#description' => $this->t('The value for the key/value pair'),
+      '#maxlength' => 255,
+      '#description' => t('Note the value field can accept tokens. Please use 0/1 for representing booleans.'),
     ];
 
-    $form['datalayer_type'] = [
-      '#title' => $this->t('Value type'),
+    $form['new']['type'] = [
       '#type' => 'select',
-      '#description' => $this->t('The value type for the key/value pair'),
+      '#title' => t('Type'),
       '#options' => [
         'string' => $this->t('String'),
-        'int' => $this->t('Integer'),
-        'float' => $this->t('Float'),
+        'integer' => $this->t('Integer'),
         'boolean' => $this->t('Boolean'),
       ],
     ];
 
-    $form['datalayer_overwrite'] = [
-      '#title' => $this->t('Overwrite dataLayer'),
-      '#type' => 'checkbox',
-      '#description' => $this->t('Overwrite the existing dataLayer'),
+    $form['new']['add_selected'] = [
+      '#type' => 'submit',
+      '#value' => $this->t('Add new pair'),
+      '#attributes' => ['class' => ['button--small']],
+      '#submit' => ['::submitForm', '::save'],
     ];
-
-    if (isset($this->getConfiguration()['data'][0])) {
-      $config = $this->getConfiguration();
-      $data = $config['data'][0];
-      $form['datalayer_key']['#default_value'] = $data['key'];
-      $form['datalayer_value']['#default_value'] = $data['value'];
-      $form['datalayer_type']['#default_value'] = $data['type'];
-      $form['datalayer_overwrite']['#default_value'] = $config['overwrite'];
-    }
 
     return $form;
   }
@@ -97,16 +145,26 @@ class DataLayer extends ContextReactionPluginBase {
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $this->setConfiguration([
-      'data' => [
-        [
-          'key' => $form_state->getValue('datalayer_key'),
-          'value' => $form_state->getValue('datalayer_value'),
-          'type' => $form_state->getValue('datalayer_type'),
-        ],
-      ],
+    // Setup config data.
+    $config = [
+      'data' => $this->getConfiguration()['data'],
       'overwrite' => $form_state->getValue('datalayer_overwrite'),
-    ]);
+    ];
+    // Add new pair if checkbox is checked.
+    if (!!$form_state->getValue('add_new_pair')) {
+      $new_pair = $form_state->getValue('new');
+      unset($new_pair['add_selected']);
+      $config['data'][] = $new_pair;
+    }
+    // Remove any pairs selected for removal.
+    if (!!count($config['data'])) {
+      foreach ($form_state->getValue(['remove', 'remove_table']) as $pair => $selected) {
+        if (!!$selected) {
+          unset($config['data'][--$pair]);
+        }
+      }
+    }
+    $this->setConfiguration($config);
   }
 
 }
