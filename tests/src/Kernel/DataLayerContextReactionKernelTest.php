@@ -60,8 +60,16 @@ class DataLayerContextReactionKernelTest extends EntityKernelTestBase {
           'value' => '0',
           'type' => 'boolean',
         ],
+        [
+          'key' => 'footoken',
+          'value' => '[site:name]',
+          'type' => 'string',
+        ],
       ],
     ];
+    // Setup the site name.
+    $config = $this->config('system.site');
+    $config->set('name', 'Context Datalayer Token Test')->save();
     // Define expected data to be sent to datalayer_add().
     $expected = [
       'data' => [
@@ -71,6 +79,7 @@ class DataLayerContextReactionKernelTest extends EntityKernelTestBase {
         'foointeger' => 2042,
         'foobooleantrue' => TRUE,
         'foobooleanfalse' => FALSE,
+        'footoken' => 'Context Datalayer Token Test',
       ],
       'overwrite' => 0,
     ];

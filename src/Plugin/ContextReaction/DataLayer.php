@@ -51,7 +51,9 @@ class DataLayer extends ContextReactionPluginBase {
         default:
           $value = $item['value'];
       }
-      $data[$item['key']] = $value;
+      $token = \Drupal::service('token');
+      $langcode = \Drupal::languageManager()->getCurrentLanguage()->getId();
+      $data[$item['key']] = $token->replace($value, [], ['langcode' => $langcode]);
     }
     return [
       'data' => $data,
